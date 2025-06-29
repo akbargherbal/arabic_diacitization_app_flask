@@ -42,11 +42,14 @@ def test_mouse_click_navigation(page: Page):
     # ARRANGE
     page.goto("http://127.0.0.1:5000/")
 
-    # CORRECTED LOCATORS: Target the VISIBLE base character span.
-    first_char_base_span = page.locator("[data-global-char-idx='0']")
-    fifth_char_base_span = page.locator("[data-global-char-idx='5']")
+    # --- MODIFIED LOCATORS ---
+    # We target the VISIBLE base character span for the click action.
+    # The `:not([data-dia])` selector ensures we get the span with the letter, not the diacritic.
+    first_char_base_span = page.locator("[data-global-dia-idx='0']:not([data-dia])")
+    fifth_char_base_span = page.locator("[data-global-dia-idx='5']:not([data-dia])")
 
-    # We still check the focus on the diacritic span, because that's where the class is.
+    # The "focus span" is still the one with the `data-dia` attribute,
+    # as this is where the `char-focus` class is applied.
     first_char_focus_span = page.locator("[data-global-dia-idx='0'][data-dia]")
     fifth_char_focus_span = page.locator("[data-global-dia-idx='5'][data-dia]")
 
@@ -55,10 +58,10 @@ def test_mouse_click_navigation(page: Page):
     expect(fifth_char_focus_span).not_to_have_class("char-focus")
 
     # ACT
-    # CORRECTED ACTION: Click the VISIBLE base character span.
+    # The click action now targets the visible, clickable base character span.
     fifth_char_base_span.click()
 
     # ASSERT
-    # The assertion remains the same.
+    # The assertions remain the same: check for the visual focus class on the diacritic span.
     expect(first_char_focus_span).not_to_have_class("char-focus")
-    expect(fifth_char_focus_span).to_have_class("char-focus")
+    expect(fifth_char_focus_span).to_have_class("char char-focus")

@@ -1,3 +1,5 @@
+# utils.py
+
 import regex as re
 from ar_data import set_ar_dia, list_ar_alpha
 
@@ -15,32 +17,38 @@ def create_char_span(char: str, char_idx: int, global_dia_idx: int) -> str:
     """Create HTML span for a character."""
     return (
         f'<span data-char-idx="{char_idx}" '
-        f'data-global-char-idx="{global_dia_idx}" '
+        f'data-global-dia-idx="{global_dia_idx}" '
         f'class="char">{char}</span>'
     )
 
 
 def create_dia_span(diacritics: str, char_idx: int, global_dia_idx: int) -> str:
     """Create HTML span for diacritics."""
+    class_binding = f":class=\"{{ 'char': true, 'char-focus': $store.editor.activeCharId == '{global_dia_idx}' }}\""
     return (
         f'<span data-dia-idx="{char_idx}" '
         f'data-global-dia-idx="{global_dia_idx}" '
         f'data-dia="{diacritics}" '
-        # This is the new line that adds reactivity.
-        # It says: "Add the 'char-focus' class if my ID matches the one in the store."
-        f":class=\"{{ 'char-focus': $store.editor.activeCharId == '{global_dia_idx}' }}\" "
-        f'class="char">{diacritics}</span>'
+        f"{class_binding}>{diacritics}</span>"
     )
 
 
 def create_word_span(html_chars: list[str], wd_idx: int) -> str:
     """Create HTML span for a word."""
-    return f'<span data-wd-idx="{wd_idx}" ' f'class="word">{"".join(html_chars)}</span>'
+    # --- MODIFIED LINE ---
+    # The word span is now fully declarative. It will apply the 'word-focus' class
+    # automatically based on the global store's state, without any manual JS.
+    class_binding = (
+        f":class=\"{{ 'word': true, 'word-focus': "
+        f"$store.editor.navigationMode === 'word' && "
+        f"$store.editor.activeWordId == '{wd_idx}' }}\""
+    )
+    return (
+        f'<span data-wd-idx="{wd_idx}" ' f'{class_binding}>{"".join(html_chars)}</span>'
+    )
 
 
 def char_has_dia(char, dia):
-    # The logic is fixed to what was previously 'dicr' mode.
-    # It considers any Arabic alphabet character as having a diacritic slot.
     if char in list_ar_alpha:
         return True
     else:
@@ -58,24 +66,17 @@ def text_to_html_spans(text):
 
     for wd_idx, word in enumerate(list_words):
         list_chars_span = split_arabic_text(word)
-
-        # In the original 'dicr' mode, any Arabic letter is counted.
         wd_dia_count = len([i for i in list_chars_span if i[0] in list_ar_alpha])
-
         html_chars = []
         is_word = wd_dia_count > 0
-
         wd_dict[wd_idx] = {"isWord": is_word, "wordDiaCount": wd_dia_count}
-
         char_idx = 0
         for char, diacritics in list_chars_span:
             char_is_alpha = char in list_ar_alpha
             has_dia = char_has_dia(char, diacritics)
-
             if char_is_alpha and has_dia:
                 char_span = create_char_span(char, char_idx, global_dia_idx)
                 dia_span = create_dia_span(diacritics, char_idx, global_dia_idx)
-
                 char_data = {
                     "char": char,
                     "dia": diacritics,
@@ -85,20 +86,17 @@ def text_to_html_spans(text):
                     "local_char_idx": char_idx,
                     "global_dia_idx": global_dia_idx,
                 }
-
                 char_dict_global[global_dia_idx] = char_data
                 char_dict_local[f"{wd_idx}_{char_idx}"] = char_data
-
                 html_chars.append(char_span + dia_span)
                 char_idx += 1
                 global_dia_idx += 1
             else:
                 html_chars.append(f'<span class="char">{char}</span>')
-
+        # Call the modified function here
         word_span = create_word_span(html_chars, wd_idx)
         html_content.append(word_span)
         total_diacritics = global_dia_idx
-
     return (
         " ".join(html_content),
         tokens_count,

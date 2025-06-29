@@ -10,22 +10,16 @@
       body {
         font-family: "Amiri", serif;
       }
-
-      /* Focus style for the currently active character */
       .char-focus {
         background-color: rgba(59, 130, 246, 0.15);
         border-bottom: 2px solid #3b82f6;
         border-radius: 3px;
       }
-
-      /* Highlight for the currently active word (in Word Focus Mode) */
       .word-focus {
-        background-color: rgba(30, 41, 59, 0.5); /* slate-800 with opacity */
+        background-color: rgba(30, 41, 59, 0.5);
         border-radius: 8px;
         padding: 0 0.2em;
       }
-
-      /* Styling for the Numpad keys */
       .numpad-key {
         position: relative;
         height: 64px;
@@ -42,42 +36,31 @@
       .numpad-key kbd {
         position: absolute;
         top: 5px;
-        left: 5px; /* LTR positioning */
+        left: 5px;
         font-size: 0.8rem;
-        color: #9ca3af; /* gray-400 */
+        color: #9ca3af;
       }
       .numpad-key .diacritic-name {
         font-size: 0.7rem;
         opacity: 0.7;
-        color: #d1d5db; /* gray-300 */
+        color: #d1d5db;
       }
-
-
-      /* ... existing styles ... */
       .numpad-key .diacritic-symbol {
-        color: #e5e7eb; /* gray-200 */
-        font-size: 2.25rem; /* text-4xl */
+        color: #e5e7eb;
+        font-size: 2.25rem;
       }
       .numpad-key:hover .diacritic-symbol {
         color: #ffffff;
       }
-      .numpad-key .diacritic-name {
-        font-size: 0.7rem;
-        opacity: 0.7;
-        color: #d1d5db; /* gray-300 */
-      }      
     </style>
-
     <script
       defer
       src="{{ url_for('static', filename='js_libraries/alpinejs.min.js') }}"
     ></script>
   </head>
 
-<body x-data="diacriticEditor" @keydown.window="handleKeydown($event)">
-    <!-- The main component for the page -->
+  <body x-data="diacriticEditor" @keydown.window="handleKeydown($event)">
     <div x-data="{ sidebarOpen: true }">
-      <!-- This button now uses the local sidebarOpen -->
       <button
         @click="sidebarOpen = !sidebarOpen"
         class="fixed top-4 right-4 z-20 p-2 bg-gray-700 rounded-md hover:bg-gray-600 text-white"
@@ -86,232 +69,139 @@
       </button>
 
       <div class="flex h-screen">
-        <!-- Sidebar -->
         <aside
           class="bg-gray-900 flex-shrink-0 flex flex-col font-sans transition-all duration-300 ease-in-out"
           :class="sidebarOpen ? 'w-72 p-6' : 'w-0 p-0 overflow-hidden'"
           x-data="{ isCtrlActive: false }"
         >
-
-        <div class="space-y-6">
-          <!-- 1. The Zoom View -->
-          <div
-            class="bg-gray-800 rounded-lg flex items-center justify-center h-48"
-          >
-            <!-- This content will be dynamic -->
-            <span class="text-9xl text-white font-serif" x-text="$store.editor.activeCharDetails.char + $store.editor.activeCharDetails.dia"></span>
-          </div>
-
-          <!-- 2. Simplified Info -->
-          <div class="text-center">
-            <div class="text-gray-400 text-sm">الحركة الحالية</div>
-            <!-- This content will be dynamic -->
-            <div class="font-mono text-green-400 text-lg">Shadda</div>
-          </div>
-
-          <!-- 3. Stateful LTR Numpad -->
-          <div class="space-y-2" dir="ltr">
-            <div class="grid grid-cols-3 gap-2">
-              <!-- Row 1: 7, 8, 9 -->
-              <button class="numpad-key bg-gray-800 rounded-lg opacity-40 cursor-not-allowed" disabled><kbd>7</kbd></button>
-              <button class="numpad-key bg-gray-800 rounded-lg opacity-40 cursor-not-allowed" disabled><kbd>8</kbd></button>
-              <button
-                @click="!isCtrlActive && $store.editor.setDiacritic('ّ')"
-                class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg"
-                :class="{ 'opacity-40 cursor-not-allowed': isCtrlActive }"
-                :disabled="isCtrlActive"
-              >
-                <kbd>9</kbd><span class="diacritic-symbol">ــّــ</span><span class="diacritic-name">Shadda</span>
-              </button>
-
-              <!-- Row 2: 4, 5, 6 -->
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('ًّ') : $store.editor.setDiacritic('ً')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>4</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــًــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــًّــ</span>
-                <span class="diacritic-name">Tan. Fatha</span>
-              </button>
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('ٍّ') : $store.editor.setDiacritic('ٍ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>5</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــٍــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــٍّــ</span>
-                <span class="diacritic-name">Tan. Kasra</span>
-              </button>
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('ٌّ') : $store.editor.setDiacritic('ٌ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>6</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــٌــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــٌّــ</span>
-                <span class="diacritic-name">Tan. Damma</span>
-              </button>
-
-              <!-- Row 3: 1, 2, 3 -->
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('َّ') : $store.editor.setDiacritic('َ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>1</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــَــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــَّــ</span>
-                <span class="diacritic-name">Fatha</span>
-              </button>
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('ِّ') : $store.editor.setDiacritic('ِ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>2</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــِــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــِّــ</span>
-                <span class="diacritic-name">Kasra</span>
-              </button>
-              <button @click="isCtrlActive ? $store.editor.setDiacritic('ُّ') : $store.editor.setDiacritic('ُ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
-                <kbd>3</kbd>
-                <span class="diacritic-symbol" x-show="!isCtrlActive">ــُــ</span>
-                <span class="diacritic-symbol" x-show="isCtrlActive">ــُّــ</span>
-                <span class="diacritic-name">Damma</span>
-              </button>
-
-              <!-- Row 4: 0, Ctrl -->
-              <button
-                @click="!isCtrlActive && $store.editor.setDiacritic('ْ')"
-                class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg col-span-2"
-                :class="{ 'opacity-40 cursor-not-allowed': isCtrlActive }"
-                :disabled="isCtrlActive"
-              >
-                <kbd>0</kbd><span class="diacritic-symbol">ــْــ</span><span class="diacritic-name">Sukun</span>
-              </button>
-              <button @click="isCtrlActive = !isCtrlActive" class="numpad-key rounded-lg text-sm" :class="isCtrlActive ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'">
-                Ctrl
+          <div class="space-y-6">
+            <div
+              class="bg-gray-800 rounded-lg flex items-center justify-center h-48"
+            >
+              <span class="text-9xl text-white font-serif" x-text="$store.editor.activeCharDetails.char + $store.editor.activeCharDetails.dia"></span>
+            </div>
+            <div class="text-center">
+              <div class="text-gray-400 text-sm">الحركة الحالية</div>
+              <div class="font-mono text-green-400 text-lg" x-text="$store.editor.activeCharDetails.diaName || '---'"></div>
+            </div>
+            <div class="space-y-2" dir="ltr">
+              <div class="grid grid-cols-3 gap-2">
+                <button class="numpad-key bg-gray-800 rounded-lg opacity-40 cursor-not-allowed" disabled><kbd>7</kbd></button>
+                <button class="numpad-key bg-gray-800 rounded-lg opacity-40 cursor-not-allowed" disabled><kbd>8</kbd></button>
+                <button @click="!isCtrlActive && $store.editor.setDiacritic('ّ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg" :class="{ 'opacity-40 cursor-not-allowed': isCtrlActive }" :disabled="isCtrlActive" >
+                  <kbd>9</kbd><span class="diacritic-symbol">ــّــ</span><span class="diacritic-name">Shadda</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('ًّ') : $store.editor.setDiacritic('ً')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>4</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــًــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــًّــ</span><span class="diacritic-name">Tan. Fatha</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('ٍّ') : $store.editor.setDiacritic('ٍ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>5</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــٍــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــٍّــ</span><span class="diacritic-name">Tan. Kasra</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('ٌّ') : $store.editor.setDiacritic('ٌ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>6</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــٌــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــٌّــ</span><span class="diacritic-name">Tan. Damma</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('َّ') : $store.editor.setDiacritic('َ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>1</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــَــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــَّــ</span><span class="diacritic-name">Fatha</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('ِّ') : $store.editor.setDiacritic('ِ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>2</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــِــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــِّــ</span><span class="diacritic-name">Kasra</span>
+                </button>
+                <button @click="isCtrlActive ? $store.editor.setDiacritic('ُّ') : $store.editor.setDiacritic('ُ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg">
+                  <kbd>3</kbd>
+                  <span class="diacritic-symbol" x-show="!isCtrlActive">ــُــ</span><span class="diacritic-symbol" x-show="isCtrlActive">ــُّــ</span><span class="diacritic-name">Damma</span>
+                </button>
+                <button @click="!isCtrlActive && $store.editor.setDiacritic('ْ')" class="numpad-key bg-gray-700/80 hover:bg-blue-600 rounded-lg col-span-2" :class="{ 'opacity-40 cursor-not-allowed': isCtrlActive }" :disabled="isCtrlActive">
+                  <kbd>0</kbd><span class="diacritic-symbol">ــْــ</span><span class="diacritic-name">Sukun</span>
+                </button>
+                <button @click="isCtrlActive = !isCtrlActive" class="numpad-key rounded-lg text-sm" :class="isCtrlActive ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'">
+                  Ctrl
+                </button>
+              </div>
+              <button @click="$store.editor.setDiacritic('')" class="w-full h-12 flex items-center justify-center bg-red-800/80 hover:bg-red-700 rounded-lg text-lg text-red-200">
+                <span>حذف</span><kbd class="text-xs bg-red-900/80 text-red-200 p-1 rounded-md ml-2 mr-0">X</kbd>
               </button>
             </div>
-            <!-- Dedicated Delete button -->
-            <button @click="$store.editor.setDiacritic('')" class="w-full h-12 flex items-center justify-center bg-red-800/80 hover:bg-red-700 rounded-lg text-lg text-red-200">
-              <span>حذف</span><kbd class="text-xs bg-red-900/80 text-red-200 p-1 rounded-md ml-2 mr-0">X</kbd>
+          </div>
+          <div class="mt-auto pt-6 border-t border-gray-700">
+            <button class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" >
+              حفظ و التالي
             </button>
           </div>
-        </div>
+        </aside>
 
-        <div class="mt-auto pt-6 border-t border-gray-700">
-          <button
-            class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            حفظ و التالي
-          </button>
-        </div>
-      </aside>
-
-      <!-- Main Editing Area -->
-      <main class="flex-1 flex flex-col">
-        {% set custom_html = injected_content %}
-        {% include 'partials/sentence.html' %}
-
-        <footer
-          class="bg-gray-900/50 border-t border-gray-700 p-2 text-sm font-sans flex items-center justify-between px-4"
-        >
-          <!-- Left side: Global App Lock -->
-
-                    <!-- Left side: Global App Lock -->
-          <button
-            @click="$store.editor.toggleAppLock()"
-            class="flex items-center space-i-2 text-gray-400 hover:text-white"
-            title="تجميد/تفعيل التطبيق"
-          >
-            <!-- Show UNLOCKED icon when app is not locked -->
-            <template x-if="!$store.editor.isAppLocked">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM9 13H7v-2h2v2zm4 0h-2v-2h2v2z" />
-                <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM9 13H7v-2h2v2zm4 0h-2v-2h2v2z" />
-                <path fill-rule="evenodd" d="M9 2a4 4 0 014 4v2H7V6a4 4 0 014-4zM6 8a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z" clip-rule="evenodd" />
-                <path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H3a2 2 0 01-2-2v-5a2 2 0 012-2h2z" />
-                <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM9 13H7v-2h2v2zm4 0h-2v-2h2v2z" />
-              </svg>
-            </template>
-            <!-- Show LOCKED icon when app is locked -->
-            <template x-if="$store.editor.isAppLocked">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
-              </svg>
-            </template>
-            <span x-text="$store.editor.isAppLocked ? 'مجمد' : 'نشط'"></span>
-          </button>
-
-          <!-- Center: Navigation Mode Switcher -->
-          <div class="bg-gray-700 rounded-md p-1 flex space-i-1">
-            <button
-              @click="$store.editor.setNavigationMode('character')"
-              :class="{ 'bg-blue-600 text-white': $store.editor.navigationMode === 'character', 'text-gray-300 hover:bg-gray-600': $store.editor.navigationMode !== 'character' }"
-              class="px-3 py-1 text-xs rounded-md"
-            >
-              نمط الحرف
+        <main class="flex-1 flex flex-col">
+          {% set custom_html = injected_content %} 
+          {% include 'partials/sentence.html' %}
+          <footer class="bg-gray-900/50 border-t border-gray-700 p-2 text-sm font-sans flex items-center justify-between px-4">
+            <button @click="$store.editor.toggleAppLock()" class="flex items-center space-i-2 text-gray-400 hover:text-white" title="تجميد/تفعيل التطبيق">
+              <template x-if="!$store.editor.isAppLocked">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM9 13H7v-2h2v2zm4 0h-2v-2h2v2z" /><path d="M9 2a4 4 0 014 4v2H7V6a4 4 0 014-4zM6 8a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z" /></svg>
+              </template>
+              <template x-if="$store.editor.isAppLocked">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+              </template>
+              <span x-text="$store.editor.isAppLocked ? 'مجمد' : 'نشط'"></span>
             </button>
-            <button
-              @click="$store.editor.setNavigationMode('word')"
-              :class="{ 'bg-blue-600 text-white': $store.editor.navigationMode === 'word', 'text-gray-300 hover:bg-gray-600': $store.editor.navigationMode !== 'word' }"
-              class="px-3 py-1 text-xs rounded-md"
-            >
-              نمط الكلمة
-            </button>
-          </div>
-
-          <!-- Right side: Progress Info -->
-          <div class="text-gray-400">
-            <span x-text="`الحرف: ${$store.editor.currentCharIndex} / ${$store.editor.totalChars}`"></span>
-          </div>
-        </footer>
-      </main>
+            <div class="bg-gray-700 rounded-md p-1 flex space-i-1">
+              <button @click="$store.editor.setNavigationMode('character')" :class="{ 'bg-blue-600 text-white': $store.editor.navigationMode === 'character', 'text-gray-300 hover:bg-gray-600': $store.editor.navigationMode !== 'character' }" class="px-3 py-1 text-xs rounded-md">نمط الحرف</button>
+              <button @click="$store.editor.setNavigationMode('word')" :class="{ 'bg-blue-600 text-white': $store.editor.navigationMode === 'word', 'text-gray-300 hover:bg-gray-600': $store.editor.navigationMode !== 'word' }" class="px-3 py-1 text-xs rounded-md" >نمط الكلمة</button>
+            </div>
+            <div class="text-gray-400">
+              <span x-text="`الحرف: ${$store.editor.currentCharIndex} / ${$store.editor.totalChars}`"></span>
+            </div>
+          </footer>
+        </main>
+      </div>
     </div>
 
     <script>
       document.addEventListener("alpine:init", () => {
         Alpine.store("editor", {
-          // --- STATE PROPERTIES ---
+          // --- STATE ---
           isAppLocked: false,
-          navigationMode: "character", // 'character' or 'word'
+          navigationMode: "character",
           activeCharId: null,
-          activeWordId: null, // To track the word for .word-focus style
+          activeWordId: null,
           interactiveCharElements: [],
           charMap: {{ char_dict_global|tojson|safe }},
+          diaLookup: {'َ':'Fatha','ً':'Tanwin Fath','ُ':'Damma','ٌ':'Tanwin Damm','ِ':'Kasra','ٍ':'Tanwin Kasr','ْ':'Sukun','ّ':'Shadda','َّ':'Shadda Fatha','ًّ':'Shadda Tan. Fath','ُّ':'Shadda Damma','ٌّ':'Shadda Tan. Damm','ِّ':'Shadda Kasra','ٍّ':'Shadda Tan. Kasr','':'None'},
 
-          // --- GETTERS (COMPUTED PROPERTIES) ---
-          get totalChars() { return this.interactiveCharElements.length; },
+          // --- GETTERS ---
+          get totalChars() {
+            return this.interactiveCharElements.length;
+          },
           get currentCharIndex() {
             if (!this.activeCharId) return 0;
-            const idx = this.interactiveCharElements.findIndex(el => el.dataset.globalDiaIdx === this.activeCharId);
+            const idx = this.interactiveCharElements.findIndex(
+              (el) => el.dataset.globalDiaIdx === this.activeCharId
+            );
             return idx + 1;
           },
           get activeCharDetails() {
             if (!this.activeCharId || !this.charMap[this.activeCharId]) {
-              return { char: "…", dia: "" };
+              return { char: "…", dia: "", diaName: "---" };
             }
             const data = this.charMap[this.activeCharId];
-            return { char: data.char, dia: data.dia };
+            return { char: data.char, dia: data.dia, diaName: this.diaLookup[data.dia] || "Unknown" };
           },
 
           // --- METHODS ---
-          setNavigationMode(mode) {
-            if (mode === "character" || mode === "word") {
-              this.navigationMode = mode;
-              console.log(`Navigation mode set to: ${this.navigationMode}`);
-              this.setActiveChar(this.activeCharId); // Re-apply styles
-            }
-          },
-          toggleAppLock() {
-            this.isAppLocked = !this.isAppLocked;
-            console.log(`App Locked: ${this.isAppLocked}`);
-          },
           init() {
-            console.log("✅ Global Editor Store is Initializing...");
-            this.interactiveCharElements = Array.from(document.querySelectorAll("[data-global-dia-idx]"));
+            this.interactiveCharElements = Array.from(document.querySelectorAll("[data-global-dia-idx]:not([data-dia])"));
             if (this.interactiveCharElements.length > 0) {
-              console.log(`Found ${this.interactiveCharElements.length} interactive characters.`);
               const firstCharId = this.interactiveCharElements[0].dataset.globalDiaIdx;
               this.setActiveChar(firstCharId);
             }
           },
           setActiveChar(charId) {
+            if (!charId || !this.charMap[charId]) return;
             this.activeCharId = charId;
-            const targetEl = document.querySelector(`[data-global-dia-idx='${charId}']`);
-            if (targetEl) {
-              this.activeWordId = this.charMap[charId].wd_idx.toString();
-              document.querySelectorAll('.word-focus').forEach(el => el.classList.remove('word-focus'));
-              if (this.navigationMode === 'word') {
-                const wordEl = document.querySelector(`[data-wd-idx='${this.activeWordId}']`);
-                if(wordEl) wordEl.classList.add('word-focus');
-              }
-            }
+            this.activeWordId = this.charMap[charId].wd_idx.toString();
           },
           setDiacritic(newDia) {
             if (this.isAppLocked || !this.activeCharId) return;
@@ -322,90 +212,103 @@
               this.charMap[this.activeCharId].dia = newDia;
             }
           },
+          setNavigationMode(mode) {
+            if (mode === "character" || mode === "word") {
+              this.navigationMode = mode;
+            }
+          },
+          toggleAppLock() {
+            this.isAppLocked = !this.isAppLocked;
+          },
           navigate(direction) {
             if (this.isAppLocked || !this.activeCharId) return;
-            if (this.navigationMode === 'character') {
-              const currentIndex = this.interactiveCharElements.findIndex(el => el.dataset.globalDiaIdx === this.activeCharId);
-              let nextIndex = currentIndex;
-              if (direction === 'next') nextIndex = (currentIndex + 1) % this.totalChars;
-              else if (direction === 'prev') nextIndex = (currentIndex - 1 + this.totalChars) % this.totalChars;
-              const nextCharId = this.interactiveCharElements[nextIndex].dataset.globalDiaIdx;
-              this.setActiveChar(nextCharId);
-              return;
-            }
-            if (this.navigationMode === 'word') {
-              const charsInWord = this.interactiveCharElements.filter(el => this.charMap[el.dataset.globalDiaIdx].wd_idx.toString() === this.activeWordId);
-              const currentIndexInWord = charsInWord.findIndex(el => el.dataset.globalDiaIdx === this.activeCharId);
-              let nextIndexInWord = currentIndexInWord;
-              if (direction === 'next') nextIndexInWord = (currentIndexInWord + 1) % charsInWord.length;
-              else if (direction === 'prev') nextIndexInWord = (currentIndexInWord - 1 + charsInWord.length) % charsInWord.length;
-              const nextCharId = charsInWord[nextIndexInWord].dataset.globalDiaIdx;
-              this.setActiveChar(nextCharId);
-            }
+            const handler = this.navigationMode === 'character' ? this._navigateChar : this._navigateInWord;
+            handler.call(this, direction);
+          },
+          _navigateChar(direction) {
+            const currentIndex = this.interactiveCharElements.findIndex(el => el.dataset.globalDiaIdx === this.activeCharId);
+            let nextIndex = (direction === 'next') ? (currentIndex + 1) : (currentIndex - 1);
+            if (nextIndex >= this.totalChars) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = this.totalChars - 1;
+            this.setActiveChar(this.interactiveCharElements[nextIndex].dataset.globalDiaIdx);
+          },
+          _navigateInWord(direction){
+             const charsInWord = this.interactiveCharElements.filter(el => this.charMap[el.dataset.globalDiaIdx].wd_idx.toString() === this.activeWordId);
+             const currentIndexInWord = charsInWord.findIndex(el => el.dataset.globalDiaIdx === this.activeCharId);
+             let nextIndexInWord = (direction === 'next') ? (currentIndexInWord + 1) : (currentIndexInWord - 1);
+             if (nextIndexInWord >= charsInWord.length) nextIndexInWord = 0;
+             if (nextIndexInWord < 0) nextIndexInWord = charsInWord.length - 1;
+             this.setActiveChar(charsInWord[nextIndexInWord].dataset.globalDiaIdx);
           },
           jumpToWord(direction) {
             if (this.isAppLocked || !this.activeCharId) return;
             const currentWordId = parseInt(this.activeWordId);
-            let targetWordId = currentWordId;
-            const wordIds = [...new Set(this.interactiveCharElements.map(el => this.charMap[el.dataset.globalDiaIdx].wd_idx))].sort((a,b) => a-b);
+            const wordIds = [...new Set(Object.values(this.charMap).map(c => c.wd_idx))].sort((a,b) => a-b);
             const currentWordIndex = wordIds.indexOf(currentWordId);
-
-            if (direction === 'next') {
-                const nextWordIndex = (currentWordIndex + 1) % wordIds.length;
-                targetWordId = wordIds[nextWordIndex];
-            } else if (direction === 'prev') {
-                const prevWordIndex = (currentWordIndex - 1 + wordIds.length) % wordIds.length;
-                targetWordId = wordIds[prevWordIndex];
-            }
-
-            const targetChar = this.interactiveCharElements.find(el => this.charMap[el.dataset.globalDiaIdx].wd_idx === targetWordId);
+            let targetWordId;
+            let nextWordIndex = (direction === 'next') ? (currentWordIndex + 1) : (currentWordIndex - 1);
+            if (nextWordIndex >= wordIds.length) nextWordIndex = 0;
+            if (nextWordIndex < 0) nextWordIndex = wordIds.length - 1;
+            targetWordId = wordIds[nextWordIndex];
+            const targetChar = Object.entries(this.charMap).find(([id, data]) => data.wd_idx === targetWordId);
             if (targetChar) {
-                this.setActiveChar(targetChar.dataset.globalDiaIdx);
+                this.setActiveChar(targetChar[0]);
             }
           }
         });
 
         Alpine.data("diacriticEditor", () => ({
           init() {
-            console.log("✅ Main diacriticEditor component is Initializing...");
             this.$store.editor.init();
+          },
+          handleCharacterClick(event) {
+            if (this.$store.editor.isAppLocked) return;
+            const charEl = event.target.closest("[data-global-dia-idx]");
+            if (charEl) {
+              this.$store.editor.setActiveChar(charEl.dataset.globalDiaIdx);
+            }
           },
           handleKeydown(event) {
             if (this.$store.editor.isAppLocked) return;
-
+            const isCtrl = event.ctrlKey || event.metaKey;
+            const key = event.key;
+            
             const diaMap = { '1':'َ','2':'ِ','3':'ُ','4':'ً','5':'ٍ','6':'ٌ','9':'ّ','0':'ْ' };
-            if (diaMap.hasOwnProperty(event.key)) {
-              event.preventDefault(); this.$store.editor.setDiacritic(diaMap[event.key]); return;
-            }
-            if (event.key === 'x' || event.key === 'Delete') {
-              event.preventDefault(); this.$store.editor.setDiacritic(''); return;
+            const diaMapCtrl = { '1':'َّ','2':'ِّ','3':'ُّ','4':'ًّ','5':'ٍّ','6':'ٌّ' };
+
+            const targetDia = isCtrl ? diaMapCtrl[key] : diaMap[key];
+            if (targetDia !== undefined) {
+              event.preventDefault();
+              this.$store.editor.setDiacritic(targetDia);
+              if (event.currentTarget.isCtrlActive) event.currentTarget.isCtrlActive = false;
+              return;
             }
 
-            switch (event.key) {
-              case 'ArrowRight':
-                if (event.ctrlKey) {
-                    event.preventDefault(); this.$store.editor.jumpToWord('next');
-                } else {
-                    event.preventDefault(); this.$store.editor.navigate('next');
-                }
+            if (key.toLowerCase() === 'x' || key === 'Delete') {
+              event.preventDefault();
+              this.$store.editor.setDiacritic('');
+              return;
+            }
+
+            switch (key) {
+              case "ArrowRight":
+                event.preventDefault();
+                isCtrl ? this.$store.editor.jumpToWord("next") : this.$store.editor.navigate("next");
                 break;
-              case 'ArrowLeft':
-                if (event.ctrlKey) {
-                    event.preventDefault(); this.$store.editor.jumpToWord('prev');
-                } else {
-                    event.preventDefault(); this.$store.editor.navigate('prev');
-                }
+              case "ArrowLeft":
+                event.preventDefault();
+                isCtrl ? this.$store.editor.jumpToWord("prev") : this.$store.editor.navigate("prev");
                 break;
-              case ' ':
-                if (this.$store.editor.navigationMode === 'word') {
-                  event.preventDefault(); this.$store.editor.navigate('next');
+              case " ":
+                if (this.$store.editor.navigationMode === "word") {
+                  event.preventDefault();
+                  event.shiftKey ? this.$store.editor.navigate("prev") : this.$store.editor.navigate("next");
                 }
                 break;
             }
-          }
+          },
         }));
       });
     </script>
-
   </body>
 </html>

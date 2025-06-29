@@ -1,12 +1,9 @@
+<!-- templates/partials/sentence.html -->
+
 <div class="flex-grow flex items-center justify-center p-4 sm:p-12">
   <div
     class="text-6xl leading-loose text-center"
-    @click="
-        const charEl = $event.target.closest('[data-global-dia-idx]');
-        if (charEl) {
-          $store.editor.setActiveChar(charEl.dataset.globalDiaIdx);
-        }
-      "
+    @click="handleCharacterClick($event)"
   >
     <!-- The server will render the initial HTML for the text here -->
     {{ custom_html|safe }}
