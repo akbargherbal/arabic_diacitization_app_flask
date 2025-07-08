@@ -1,11 +1,25 @@
 <!-- templates/partials/sentence.html -->
 
-<div class="flex-grow flex items-center justify-center p-4 sm:p-12">
-  <div
-    class="text-6xl leading-loose text-center"
-    @click="handleCharacterClick($event)"
-  >
-    <!-- The server will render the initial HTML for the text here -->
-    {{ custom_html|safe }}
-  </div>
+<div
+  class="text-6xl leading-loose text-center"
+  @click="handleCharacterClick($event)"
+>
+  <!-- The server will render the initial HTML for the text here -->
+  {{ custom_html|safe }}
 </div>
+
+<!-- ADD THIS CONDITIONAL SCRIPT BLOCK -->
+{% if is_htmx_update %}
+<!-- This script will ONLY be included in the HTMX response.
+     It runs automatically after HTMX swaps the content above. -->
+<script>
+  console.log("HTMX response received. Updating Alpine store...");
+
+  // 1. Update the Alpine store's data with the new charMap from the server.
+  Alpine.store('editor').charMap = {{ char_dict_global|tojson|safe }};
+
+  // 2. Trigger the store's init() method. This is the crucial step that
+  //    tells Alpine to re-scan the new DOM and reset its internal state.
+  Alpine.store('editor').init();
+</script>
+{% endif %}

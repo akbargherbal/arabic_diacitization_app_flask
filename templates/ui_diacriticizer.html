@@ -55,6 +55,9 @@
         color: #ffffff;
       }
     </style>
+    <!-- ADD HTMX SCRIPT TAG -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    
     <script
       defer
       src="{{ url_for('static', filename='js_libraries/alpinejs.min.js') }}"
@@ -211,7 +214,11 @@
             </div>
           </div>
           <div class="mt-auto pt-6 border-t border-gray-700">
+            <!-- MODIFY THIS BUTTON WITH HTMX ATTRIBUTES -->
             <button
+              hx-post="/save-and-next"
+              hx-target="#sentence-container"
+              hx-swap="innerHTML"
               class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
             >
               حفظ و التالي
@@ -220,8 +227,11 @@
         </aside>
 
         <main class="flex-1 flex flex-col">
-          {% set custom_html = injected_content %} 
-          {% include 'partials/sentence.html' %}
+          <!-- ADD AN ID TO THIS WRAPPER DIV -->
+          <div id="sentence-container" class="flex-grow flex items-center justify-center p-4 sm:p-12">
+              {% set custom_html = injected_content %} 
+              {% include 'partials/sentence.html' %}
+          </div>
           <footer
             class="bg-gray-900/50 border-t border-gray-700 p-2 text-sm font-sans flex items-center justify-between px-4"
           >
@@ -320,8 +330,10 @@ const style20 = 'color: #4B0082; font-family: Impact;';
           navigationMode: "character",
           activeCharId: null,
           activeWordId: null,
-          interactiveCharElements: [],
+          interactiveCharElements: [], // what is that and what's for?
           charMap: {{ char_dict_global|tojson|safe }},
+          wordDict: {{ wd_dict|tojson|safe }},
+          
           diaLookup: {'َ':'Fatha','ً':'Tanwin Fath','ُ':'Damma','ٌ':'Tanwin Damm','ِ':'Kasra','ٍ':'Tanwin Kasr','ْ':'Sukun','ّ':'Shadda','َّ':'Shadda Fatha','ًّ':'Shadda Tan. Fath','ُّ':'Shadda Damma','ٌّ':'Shadda Tan. Damm','ِّ':'Shadda Kasra','ٍّ':'Shadda Tan. Kasr','':'None'},
 
           // --- GETTERS ---
@@ -331,7 +343,7 @@ const style20 = 'color: #4B0082; font-family: Impact;';
           },
           get currentCharIndex() {
             console.log('%cCalling currentCharIndex in Alpine.store("editor")', style02)
-            if (!this.activeCharId) return 0;
+            if (!this.activeCharId) return 0; // comment here; so is this the one tht select the first character at the beginning?
             const idx = this.interactiveCharElements.findIndex(
               (el) => el.dataset.globalDiaIdx === this.activeCharId
             );
@@ -357,9 +369,14 @@ const style20 = 'color: #4B0082; font-family: Impact;';
               const firstCharId = this.interactiveCharElements[0].dataset.globalDiaIdx;
               this.setActiveChar(firstCharId);
             }
+
+            console.log(`%cActive Character ID: ${this.activeCharId}`, style04);
+            console.log(`%cActive Word ID: ${this.activeWordId}`, style04);
+
             console.log(`End of init in Alpine.store("editor")
 -----------------------------------------------------------------------------------            
             `)
+
           },
           setActiveChar(charId) {
             console.log('%cCalling setActiveChar in Alpine.store("editor")', style05)
@@ -431,6 +448,28 @@ const style20 = 'color: #4B0082; font-family: Impact;';
         Alpine.data("diacriticEditor", () => ({
           init() {
             console.log('%cCalling init in Alpine.data("diacriticEditor") [PLACEHOLDER FOR FUTURE NEEDS]', style13)
+            // This line automatically runs the store's init() once the component is ready
+            this.$store.editor.init();
+
+            // watch store valules;
+
+            this.$watch('$store.editor.activeCharId', (newVal, oldVal) => {
+              console.log(`%cActive character changed from ${oldVal} to ${newVal}`, style14);
+            });
+
+
+            this.$watch('$store.editor.activeWordId', (newVal, oldVal) => {
+              console.log(`%cActive word changed from ${oldVal} to ${newVal}`, style14);
+            });
+
+            // watch current word change; using wordDict lookup of activeWordId
+            this.$watch('$store.editor.activeWordId', (newVal, oldVal) => {
+              const oldWord = oldVal ? this.$store.editor.wordDict[oldVal].word : 'None';
+              const newWord = newVal ? this.$store.editor.wordDict[newVal].word : 'None';
+              console.log(`%cActive word content changed from "${oldWord}" to "${newWord}"`, style14);
+
+            });
+
           },
           handleCharacterClick(event) {
             console.log('%cCalling handleCharacterClick in Alpine.data("diacriticEditor")', style14)
