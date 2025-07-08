@@ -17,13 +17,11 @@ def create_char_span(
     char: str, char_idx: int, global_dia_idx: int, word_id: int
 ) -> str:
     """Create HTML span for a character."""
-    class_binding = f":class=\"{{'char-focus': $store.editor.activeCharId == '{global_dia_idx}' }}\""
     return (
         f'<span data-char-idx="{char_idx}" '
         f'data-global-dia-idx="{global_dia_idx}" '
         f'class="char" '
-        f'data-wd-idx="{word_id}" '
-        f"{class_binding}>{char}</span>"  # Apply focus class to the base character since diacritics are too small for individual styling; this is more of a workaround; as applying style diacritic only won't be noticible in the browser.
+        f'data-wd-idx="{word_id}">{char}</span>'
     )
 
 
@@ -31,29 +29,21 @@ def create_dia_span(
     diacritics: str, char_idx: int, global_dia_idx: int, word_id: int
 ) -> str:
     """Create HTML span for diacritics."""
-    class_binding = f":class=\"{{ 'char': true, 'char-focus': $store.editor.activeCharId == '{global_dia_idx}' }}\""
     return (
         f'<span data-dia-idx="{char_idx}" '
         f'data-global-dia-idx="{global_dia_idx}" '
         f'data-dia="{diacritics}" '
-        f'data-wd-idx="{word_id}" '
-        f"{class_binding}>{diacritics}</span>"
+        f'data-wd-idx="{word_id}">{diacritics}</span>'
     )
 
 
 def create_word_span(html_chars: list[str], wd_idx: int) -> str:
     """Create HTML span for a word."""
-    # --- MODIFIED LINE ---
-    # The word span is now fully declarative. It will apply the 'word-focus' class
-    # automatically based on the global store's state, without any manual JS.
-    class_binding = (
-        f":class=\"{{ 'word': true, 'word-focus': "
-        f"$store.editor.navigationMode === 'word' && "
-        f"$store.editor.activeWordId == '{wd_idx}' }}\""
+
+    word_identifier = (
+        f'data-wd-idx="{wd_idx}"' if "data-wd-idx" in "".join(html_chars) else ""
     )
-    return (
-        f'<span data-wd-idx="{wd_idx}" ' f'{class_binding}>{"".join(html_chars)}</span>'
-    )
+    return f"<span {word_identifier} " f'>{"".join(html_chars)}</span>'
 
 
 def char_has_dia(char, dia):

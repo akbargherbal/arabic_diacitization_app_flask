@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diacritic Editor - Fixed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap");
+      body {
+        font-family: "Amiri", serif;
+      }
+      .char-focus {
+        background-color: rgba(59, 130, 246, 0.15);
+        border-bottom: 2px solid #3b82f6;
+        border-radius: 3px;
+      }
+      .word-focus {
+        background-color: rgba(30, 41, 59, 0.5);
+        border-radius: 8px;
+        padding: 0 0.2em;
+      }
+      .numpad-key {
+        position: relative;
+        height: 64px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 8px;
+        padding-bottom: 4px;
+        font-size: 2rem;
+        line-height: 1;
+        transition: all 150ms ease-in-out;
+      }
+      .numpad-key kbd {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+      .numpad-key .diacritic-name {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        color: #d1d5db;
+        padding-bottom: 0.5rem;
+      }
+      .numpad-key .diacritic-symbol {
+        color: #e5e7eb;
+        font-size: 2.25rem;
+      }
+      .numpad-key:hover .diacritic-symbol {
+        color: #ffffff;
+      }
+    </style>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+
+  <body
+    x-data="diacriticEditor"
+    @keydown.window="dispatcher({ type: 'KEY_PRESS', payload: $event })"
+  >
+    <main
+      class="flex-1 flex flex-col cursor-pointer select-none"
+      :class="{'bg-sky-200': $store.editorStore.editorArea.active, 'bg-slate-300': !$store.editorStore.editorArea.active }"
+      @dblclick="dispatcher({ type: 'TOGGLE_EDIT_MODE', payload: $event })"
+      @click="dispatcher({ type: 'CLICK_ELEMENT', payload: $event })"
+    >
+      <!-- ADD AN ID TO THIS WRAPPER DIV -->
+      <div
+        id="sentence-container"
+        class="flex-grow flex items-center justify-center p-4 sm:p-12"
+      >
+        <!-- This is where the sentence will be injected by htmx -->
+      </div>
+      {% set custom_html = injected_content %} {% include
+      'partials/sentence.html' %}
+    </main>
+
+    <script>
+      // MOVED ALL CONSTANTS TO THE TOP - BEFORE ALPINE INITIALIZATION
+      const listValidDiacritics = [
+        "َ", // Fatha
+        "ِ", // Kasra
+        "ُ", // Damma
+        "ً", // Fathatan
+        "ٍ", // Kasratan
+        "ٌ", // Dammatan
+        "ْ", // Sukun
+        "ّ", // Shadda
+        "َّ", // Shadda with Fatha
+        "ِّ", // Shadda with Kasra
+        "ُّ", // Shadda with Damma
+        "ًّ", // Shadda with Fathatan
+        "ٍّ", // Shadda with Kasratan
+        "ٌّ", // Shadda with Dammatan
+      ];
+
+      const diacriticsMap = {
+        Fatha: "َ",
+        Kasra: "ِ",
+        Damma: "ُ",
+        Fathatan: "ً",
+        Kasratan: "ٍ",
+        Dammatan: "ٌ",
+        Sukun: "ْ",
+        Shadda: "ّ",
+        Shadda_Fatha: "َّ",
+        Shadda_Kasra: "ِّ",
+        Shadda_Damma: "ُّ",
+        Shadda_Fathatan: "ًّ",
+        Shadda_Kasratan: "ٍّ",
+        Shadda_Dammatan: "ٌّ",
+      };
+
+      const hotKeysMap = {
+        "1_0": { ctrl: false, dia: "Fatha" },
+        "2_0": { ctrl: false, dia: "Kasra" },
+        "3_0": { ctrl: false, dia: "Damma" },
+        "4_0": { ctrl: false, dia: "Fathatan" },
+        "5_0": { ctrl: false, dia: "Kasratan" },
+        "6_0": { ctrl: false, dia: "Dammatan" },
+        "0_0": { ctrl: false, dia: "Sukun" },
+        "7_0": { ctrl: false, dia: "Shadda" },
+        "1_1": { ctrl: true, dia: "Shadda_Fatha" },
+        "2_1": { ctrl: true, dia: "Shadda_Kasra" },
+        "3_1": { ctrl: true, dia: "Shadda_Damma" },
+        "4_1": { ctrl: true, dia: "Shadda_Fathatan" },
+        "5_1": { ctrl: true, dia: "Shadda_Kasratan" },
+        "6_1": { ctrl: true, dia: "Shadda_Dammatan" },
+      };
+
+      function cycleThrough(currentIndex, iterable) {
+        return currentIndex + 1 >= iterable.length ? 0 : currentIndex + 1;
+      }
+    </script>
+
+    <script>
+      /* ALPINE STORE */
+      document.addEventListener("alpine:init", () => {
+        Alpine.store("editorStore", {
+          serverData: {},
+          editorArea: { active: true },
+          currentElement: {
+            isSelected: false,
+            diacritic: null,
+            letter: null,
+            word: null,
+            diaIdx: null,
+            letterIdx: null,
+            wordIdx: null,
+          },
+
+          currentHotKey: {
+            key: null,
+            ctrl: false,
+            alt: false,
+            shift: false,
+          },
+
+          listenToKeyPress(event) {
+            const isEditMode = this.editorArea.active;
+            if (!isEditMode) return;
+
+            console.log("Key pressed:", event.key);
+
+            this.currentHotKey.key = event.key;
+            this.currentHotKey.ctrl = event.ctrlKey;
+
+            const key = this.currentHotKey.key;
+            const ctrl = this.currentHotKey.ctrl;
+            const keyComb = `${key}_${Number(ctrl)}`;
+
+            // Check if the key combination exists in hotKeysMap
+            if (!hotKeysMap[keyComb]) {
+              console.log("Invalid key combination:", keyComb);
+              return;
+            }
+
+            const selectedDia = hotKeysMap[keyComb].dia;
+            const diaValue = diacriticsMap[selectedDia];
+
+            this.setDiacritc(diaValue);
+          },
+
+          setDiacritc(dia) {
+            const isValidDia = listValidDiacritics.includes(dia);
+            if (!isValidDia) return;
+
+            const diaIdx = this.currentElement.diaIdx;
+            const selectorDia = `[data-global-dia-idx="${diaIdx}"][data-dia]`;
+
+            const diaElement = document.querySelector(selectorDia);
+            if (diaElement) {
+              diaElement.textContent = dia;
+              diaElement.setAttribute("data-dia", dia);
+            }
+          },
+
+          clickElement(event) {
+            const target = event.target.closest("[data-global-dia-idx]");
+            if (target) {
+              this.currentElement.letterIdx = target.getAttribute("data-global-dia-idx");
+              this.currentElement.diaIdx = this.currentElement.letterIdx;
+              this.currentElement.wordIdx = target.getAttribute("data-wd-idx");
+
+              const diaElement = document.querySelector(
+                `[data-global-dia-idx="${this.currentElement.letterIdx}"][data-dia]`
+              );
+              
+              if (diaElement) {
+                this.currentElement.diacritic = diaElement.textContent;
+              }
+
+              const wordElement = document.querySelector(
+                `[data-wd-idx="${this.currentElement.wordIdx}"]:not([data-global-dia-idx])`
+              );
+              
+              if (wordElement) {
+                this.currentElement.word = wordElement.textContent;
+              }
+
+              console.log(
+                `Diacritic: ${this.currentElement.diacritic}, Letter Index: ${this.currentElement.letterIdx}, Word Index: ${this.currentElement.wordIdx}, Word: ${this.currentElement.word}`
+              );
+            }
+          },
+
+          toggleEditMode() {
+            this.editorArea.active = !this.editorArea.active;
+            console.log(`Active Area: ${this.editorArea.active ? "ON" : "OFF"}`);
+          },
+        });
+      });
+    </script>
+
+    <script>
+      /* ALPINE COMPONENT */
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("diacriticEditor", () => ({
+          dispatcher(action) {
+            console.log('Action Dispatched:', action);
+
+            switch(action.type) {
+              case 'TOGGLE_EDIT_MODE':
+                this.$store.editorStore.toggleEditMode(action.payload);
+                break;
+
+              case 'CLICK_ELEMENT':
+                this.$store.editorStore.clickElement(action.payload);
+                break;
+
+              case 'KEY_PRESS':
+                this.$store.editorStore.listenToKeyPress(action.payload);
+                break;
+
+              default:
+                console.warn('Unknown action type:', action.type);
+            }
+          },
+
+          init() {
+            // Initialize with serverData if available
+            this.$store.editorStore.serverData = {{ serverData | tojson | safe }};
+          },
+        }));
+      });
+    </script>
+  </body>
+</html>

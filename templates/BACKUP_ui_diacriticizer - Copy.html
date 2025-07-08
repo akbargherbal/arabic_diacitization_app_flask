@@ -6,6 +6,61 @@
     <title>Diacritic Editor - Final Mockup</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <script>
+      const listValidDiacritics = [
+                "َ", // Fatha
+                "ِ", // Kasra
+                "ُ", // Damma
+                "ً", // Fathatan
+                "ٍ", // Kasratan
+                "ٌ", // Dammatan
+                "ْ", // Sukun
+                "ّ", // Shadda
+                "َّ", // Shadda with Fatha
+                "ِّ", // Shadda with Kasra
+                "ُّ", // Shadda with Damma
+                "ًّ", // Shadda with Fathatan
+                "ٍّ", // Shadda with Kasratan
+                "ٌّ", // Shadda with Dammatan
+              ];
+
+      const diacriticsMap = {
+                Fatha: "َ",
+                Kasra: "ِ",
+                Damma: "ُ",
+                Fathatan: "ً",
+                Kasratan: "ٍ",
+                Dammatan: "ٌ",
+                Sukun: "ْ",
+                Shadda: "ّ",
+                Shadda_Fatha: "َّ",
+                Shadda_Kasra: "ِّ",
+                Shadda_Damma: "ُّ",
+                Shadda_Fathatan: "ًّ",
+                Shadda_Kasratan: "ٍّ",
+                Shadda_Dammatan: "ٌّ",
+              };
+
+
+      const hotKeysMap = {
+          1_0: { ctrl: false, dia: Fatha },
+          2_0: { ctrl: false, dia: Kasra },
+          3_0: { ctrl: false, dia: Damma },
+          4_0: { ctrl: false, dia: Fathatan },
+          5_0: { ctrl: false, dia: Kasratan },
+          6_0: { ctrl: false, dia: Dammatan },
+          0_0: { ctrl: false, dia: Sukun },
+          7_0: { ctrl: false, dia: Shadda },
+
+          1_1: { ctrl: true, dia: Shadda_Fatha },
+          2_1: { ctrl: true, dia: Shadda_Kasra },
+          3_1: { ctrl: true, dia: Shadda_Damma },
+          4_1: { ctrl: true, dia: Shadda_Fathatan },
+          5_1: { ctrl: true, dia: Shadda_Kasratan },
+          6_1: { ctrl: true, dia: Shadda_Dammatan },
+        };
+    </script>
+
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap");
       body {
@@ -90,8 +145,8 @@
     </main>
 
     <script>
-      function cycleThrough(currentIndex, maxIndex) {
-        return currentIndex + 1 >= maxIndex ? 0 : currentIndex + 1;
+      function cycleThrough(currentIndex, iterable) {
+        return currentIndex + 1 >= iterable.length ? 0 : currentIndex + 1;
       }
 
       const style01 =
@@ -118,84 +173,13 @@
     </script>
 
     <script>
-      const listValidDiacritics = [
-        "َ", // Fatha
-        "ِ", // Kasra
-        "ُ", // Damma
-        "ً", // Fathatan
-        "ٍ", // Kasratan
-        "ٌ", // Dammatan
-        "ْ", // Sukun
-        "ّ", // Shadda
-        "َّ", // Shadda with Fatha
-        "ِّ", // Shadda with Kasra
-        "ُّ", // Shadda with Damma
-        "ًّ", // Shadda with Fathatan
-        "ٍّ", // Shadda with Kasratan
-        "ٌّ", // Shadda with Dammatan
-      ];
-
-      const diacriticsMap = {
-        Fatha: "َ",
-        Kasra: "ِ",
-        Damma: "ُ",
-        Fathatan: "ً",
-        Kasratan: "ٍ",
-        Dammatan: "ٌ",
-        Sukun: "ْ",
-        Shadda: "ّ",
-        Shadda_Fatha: "َّ",
-        Shadda_Kasra: "ِّ",
-        Shadda_Damma: "ُّ",
-        Shadda_Fathatan: "ًّ",
-        Shadda_Kasratan: "ٍّ",
-        Shadda_Dammatan: "ٌّ",
-      };
-
-      const diaHotkeysMap = {
-        "1_0": { ctrl: false, dia: "Fatha" },
-        "2_0": { ctrl: false, dia: "Kasra" },
-        "3_0": { ctrl: false, dia: "Damma" },
-        "4_0": { ctrl: false, dia: "Fathatan" },
-        "5_0": { ctrl: false, dia: "Kasratan" },
-        "6_0": { ctrl: false, dia: "Dammatan" },
-        "0_0": { ctrl: false, dia: "Sukun" },
-        "7_0": { ctrl: false, dia: "Shadda" },
-
-        "1_1": { ctrl: true, dia: "Shadda_Fatha" },
-        "2_1": { ctrl: true, dia: "Shadda_Kasra" },
-        "3_1": { ctrl: true, dia: "Shadda_Damma" },
-        "4_1": { ctrl: true, dia: "Shadda_Fathatan" },
-        "5_1": { ctrl: true, dia: "Shadda_Kasratan" },
-        "6_1": { ctrl: true, dia: "Shadda_Dammatan" },
-      };
-
-      navigationHotkeysMap = {
-        ArrowRight_0: { ctrl: false, nav: "nextChar" },
-        ArrowLeft_0: { ctrl: false, nav: "prevChar" },
-        ArrowRight_1: { ctrl: true, nav: "nextWord" },
-        ArrowLeft_1: { ctrl: true, nav: "prevWord" },
-      };
-
-      function getKeyboardEventType(keyboardEventId) {
-        switch (true) {
-          case Object.keys(diaHotkeysMap).includes(keyboardEventId):
-            return "SET_DIACRITIC";
-          case Object.keys(navigationHotkeysMap).includes(keyboardEventId):
-            return "NAVIGATE";
-          default:
-            return "N/A";
-        }
-      }
-    </script>
-
-    <script>
       /* FAT STORE */
       document.addEventListener("alpine:init", () => {
         Alpine.store("editorStore", {
           serverData: {},
           editorArea: { active: true },
           currentElement: {
+            isSelected: false,
             diacritic: null,
             letter: null,
             word: null,
@@ -204,13 +188,11 @@
             wordIdx: null,
           },
 
-          currentPressedKey: {
+          currentHotKey: {
             key: null,
             ctrl: false,
             alt: false,
             shift: false,
-            code: null,
-            
           },
 
           listenToKeyPress(event) {
@@ -223,57 +205,20 @@
             console.log("Key pressed:", event.key);
 
             // here comes a new function; that's tasked with looking up hotkey value;
-            this.currentPressedKey.key = event.key;
-            this.currentPressedKey.ctrl = event.ctrlKey;
+            this.currentHotKey.key = event.key;
+            this.currentHotKey.ctrl = event.ctrlKey;
 
-            // return early if this.currentPressedKey.key not in diaMap:
+            // return early if this.currentHotKey.key not in diaMap:
 
-            const key = this.currentPressedKey.key;
-            const ctrl = this.currentPressedKey.ctrl;
+            const key = this.currentHotKey.key;
+            const ctrl = this.currentHotKey.ctrl;
 
             const keyComb = `${key}_${Number(ctrl)}`;
-            console.log(keyComb);
-            
-            /*
-            if (!diaHotkeysMap[keyComb]) return;
-            // prevent default:
-            event.preventDefault();
 
-            const dia_en = diaHotkeysMap[keyComb].dia;
-            const dia = diacriticsMap[dia_en];
+            const selectedDia = hotKeysMap[keyComb].dia;
+            const diaValue = diacriticsMap[selectedDia];
 
-            this.setDiacritc(dia);
-
-            */
-
-            if (getKeyboardEventType(keyComb) === "SET_DIACRITIC") {
-              event.preventDefault();
-
-            const dia_en = diaHotkeysMap[keyComb].dia;
-            const dia = diacriticsMap[dia_en];
-            this.setDiacritc(dia);
-            } else if (getKeyboardEventType(keyComb) === "NAVIGATE") {
-              event.preventDefault();
-
-              const nav = navigationHotkeysMap[keyComb].nav;
-              if (nav === "nextChar") {
-                console.log(`Navigating to next character: ${this.currentElement.letterIdx}`);
-                this.navigateLetters(this.currentElement.letterIdx);
-              } else if (nav === "prevChar") {
-                console.log(`Navigating to previous character: ${this.currentElement.letterIdx}`);
-                this.navigateLetters(this.currentElement.letterIdx - 1);
-              } else if (nav === "nextWord") {
-                console.log(`Navigating to next word: ${this.currentElement.wordIdx}`);
-                this.navigateWords(this.currentElement.wordIdx);
-              } else if (nav === "prevWord") {
-                console.log(`Navigating to previous word: ${this.currentElement.wordIdx}`);
-                this.navigateWords(this.currentElement.wordIdx - 1);
-              }
-            } else {
-              console.log("Unhandled key press:", keyComb);
-              return;
-            }
-
+            this.setDiacritc(diaValue);
           },
 
           setDiacritc(dia) {
@@ -291,8 +236,8 @@
           },
 
           clickElement(event) {
-            //const selectorLetter = "[data-global-dia-idx]:not([data-dia]";
-            // const selectorWord = "[data-wd-idx]";
+            const selectorLetter = "[data-global-dia-idx]:not([data-dia]";
+            const selectorWord = "[data-wd-idx]";
 
             const target = event.target.closest("[data-global-dia-idx]");
             if (target) {
@@ -320,28 +265,6 @@
             this.editorArea.active = !this.editorArea.active;
             console.log(
               `Active Area: ${this.editorArea.active ? "ON" : "OFF"}`
-            );
-          },
-
-          navigateWords(wordIdx) {
-            const wordsCount = this.serverData.tokens_count;
-            this.currentElement.wordIdx = cycleThrough(wordIdx, wordsCount);
-            // select the first span letter within word span;
-            // [data-wd-idx][data-char-idx="0"]
-          const elem = document.querySelector('[data-wd-idx][data-char-idx="0"]');
-          const parent = elem?.parentElement;
-
-          console.log(parent);
-
-
-
-
-          },
-          navigateLetters(letterIdx) {
-            const lettersCount = this.serverData.total_diacritics;
-            this.currentElement.letterIdx = cycleThrough(
-              letterIdx,
-              lettersCount
             );
           },
         });
@@ -377,10 +300,6 @@
           init() {
             // Initialize with serverData
             this.$store.editorStore.serverData = {{ serverData | tojson | safe }};
-            this.$store.editorStore.currentElement.letterIdx = 0;
-            this.$store.editorStore.currentElement.diaIdx = 0;
-            this.$store.editorStore.currentElement.wordIdx = 0;
-
           },
         }));
       });

@@ -21,15 +21,19 @@ def index():
         char_dict_local,
     ) = text_to_html_spans(verse)
 
+    serverData = {
+        "tokens_count": tokens_count,
+        "total_diacritics": total_diacritics,
+        "wd_dict": wd_dict,
+        "char_dict_global": char_dict_global,
+        "char_dict_local": char_dict_local,
+    }
+
     return render_template(
         "ui_diacriticizer.html",
         # This part is correct because ui_diacriticizer.html aliases this variable
         injected_content=html_content,
-        tokens_count=tokens_count,
-        total_diacritics=total_diacritics,
-        wd_dict=wd_dict,
-        char_dict_global=char_dict_global,
-        char_dict_local=char_dict_local,
+        serverData=serverData,
     )
 
 
@@ -53,17 +57,21 @@ def save_and_next():
         char_dict_local,
     ) = text_to_html_spans(next_verse)
 
+    serverData = {
+        "tokens_count": tokens_count,
+        "total_diacritics": total_diacritics,
+        "wd_dict": wd_dict,
+        "char_dict_global": char_dict_global,
+        "char_dict_local": char_dict_local,
+    }
+
     # Render the SAME partial, but pass a flag to it.
     # --- FIX #2: Pass the HTML content as `custom_html` to match the template ---
     return render_template(
         "partials/sentence.html",
         custom_html=html_content,  # CORRECTED VARIABLE NAME
         # The rest of these are needed by the script block in sentence.html
-        tokens_count=tokens_count,
-        total_diacritics=total_diacritics,
-        wd_dict=wd_dict,
-        char_dict_global=char_dict_global,
-        char_dict_local=char_dict_local,
+        serverData=serverData,
         is_htmx_update=True,
     )
 
